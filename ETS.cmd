@@ -15,29 +15,29 @@ if %errorlevel% NEQ 0 (
 
 
 :: ====== FIX: Prevent Termination While Cleaning TEMP ======
-set SAFE_DIR=C:\ETS911
+set SAFE_DIR=%ProgramData%\ETS911
+set SCRIPT_NAME=%~nx0
+set SAFE_SCRIPT=%SAFE_DIR%\%SCRIPT_NAME%
+
 if not exist "%SAFE_DIR%" mkdir "%SAFE_DIR%"
 
-set SCRIPT_NAME=%~nx0
+:: Check if script is already running from the safe location
+if /I "%CD%" neq "%SAFE_DIR%" (
+    echo Moving script to %SAFE_DIR%...
+    
+    :: Copy the script to SAFE_DIR
+    copy "%~f0" "%SAFE_SCRIPT%" /Y >nul
 
-:: Check if running from TEMP
-echo %CD% | findstr /I "temp" >nul
-if %errorlevel%==0 (
-    echo Script is running from TEMP. Moving to %SAFE_DIR%...
-    
-    :: Download fresh script from GitHub
-    powershell -Command "Invoke-WebRequest 'https://ets911.in/clean' -OutFile '%SAFE_DIR%\clean.bat'"
-    
-    :: Run script from the safe directory
-    start "" "%SAFE_DIR%\clean.bat"
-    
-    :: Exit current script to prevent termination
-    exit /b
+    :: Start the script from SAFE_DIR
+    start "" "%SAFE_SCRIPT%"
+
+    :: Exit current instance
+    exit
 )
 
-:: If already running from a safe location, continue execution
-:: echo Running from a safe directory, proceeding...
-
+:: Now running from SAFE_DIR, proceed with execution
+cd /d "%SAFE_DIR%"
+echo Running from a safe location, proceeding...
 
 :main
 cls
