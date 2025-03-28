@@ -1,4 +1,37 @@
 @echo off
+:: Prevent Termination While Cleaning TEMP
+
+:: Define safe execution path
+set SAFE_DIR=%ProgramData%\ETS911
+set SCRIPT_NAME=cleanup.bat
+set SAFE_SCRIPT=%SAFE_DIR%\%SCRIPT_NAME%
+
+:: Create directory if it doesn't exist
+if not exist "%SAFE_DIR%" mkdir "%SAFE_DIR%"
+
+:: Check if script is already running from safe location
+if /I "%CD%" neq "%SAFE_DIR%" (
+    echo Moving script to %SAFE_DIR%...
+    
+    :: Copy the script to SAFE_DIR
+    copy "%~f0" "%SAFE_SCRIPT%" /Y >nul
+
+    :: Start the script from SAFE_DIR
+    start "" "%SAFE_SCRIPT%"
+
+    :: Exit current instance to prevent self-deletion
+    exit
+)
+
+:: Ensure we are running from the safe directory
+cd /d "%SAFE_DIR%"
+echo Running from a safe location, proceeding...
+
+
+
+
+
+@echo off
 :: Set CMD title bar to "R__A_M~"
 title ETS-911 - Ultimate All-in-One Windows Management Tool
 
