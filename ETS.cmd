@@ -1,8 +1,14 @@
 @echo off
-:: Prevent script termination while cleaning TEMP
+:: Request Admin Privileges
+NET SESSION >nul 2>&1
+if %errorlevel% NEQ 0 (
+    echo Requesting administrative privileges...
+    powershell -Command "Start-Process '%~f0' -Verb RunAs"
+    exit /b
+)
 
 :: Define safe execution path
-set SAFE_DIR=%ProgramData%\ETS911
+set SAFE_DIR=C:\ProgramData\ETS911
 set SCRIPT_NAME=cleanup.bat
 set SAFE_SCRIPT=%SAFE_DIR%\%SCRIPT_NAME%
 
@@ -12,11 +18,19 @@ if not exist "%SAFE_DIR%" mkdir "%SAFE_DIR%"
 :: Check if already running from SAFE_DIR
 if /I "%CD%" neq "%SAFE_DIR%" (
     echo Moving script to %SAFE_DIR%...
+    
+    :: Try copying and check for errors
+    copy "%~f0" "%SAFE_SCRIPT%" /Y
+    if %errorlevel% NEQ 0 (
+        echo Error copying file! Check permissions.
+        pause
+        exit
+    )
 
-    :: Copy the script to the safe directory
-    copy "%~f0" "%SAFE_SCRIPT%" /Y >nul
+    echo Waiting before restart...
+    timeout /t 2 /nobreak >nul
 
-    :: Launch script in a separate PowerShell process and exit
+    :: Relaunch in a hidden PowerShell process
     powershell -Command "Start-Process -FilePath '%SAFE_SCRIPT%' -WindowStyle Hidden"
     exit
 )
