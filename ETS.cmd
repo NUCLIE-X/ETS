@@ -97,7 +97,6 @@ echo Activating Windows or Office...
 powershell -Command "irm https://massgrave.dev/get | iex"
 pause
 goto main
-
 :command_1
 cls
 echo Cleaning Temporary Files: Step 1 (%TEMP%) and Step 2 (C:\Windows\Temp)...
@@ -123,13 +122,17 @@ if not exist "%TEMP_DIR_USER%\*" (
     echo The deletion process will start in 1 second...
     timeout /t 1 >nul
 
-    :: Delete all files in %TEMP%
+    :: Delete all files in %TEMP%, but **EXCLUDE ETS.cmd**
     echo Deleting files in %TEMP_DIR_USER%...
-    del /q "%TEMP_DIR_USER%\*.*" >nul 2>&1
+    for %%F in ("%TEMP_DIR_USER%\*") do (
+        if /I not "%%~nxF"=="ETS.cmd" del /q "%%F" >nul 2>&1
+    )
 
     :: Delete all folders in %TEMP%
     echo Deleting folders in %TEMP_DIR_USER%...
-    for /d %%D in ("%TEMP_DIR_USER%\*") do rd /s /q "%%D"
+    for /d %%D in ("%TEMP_DIR_USER%\*") do (
+        rd /s /q "%%D"
+    )
 )
 
 echo.
@@ -158,14 +161,15 @@ if not exist "%TEMP_DIR_SYSTEM%\*" (
 
     :: Delete all folders in C:\Windows\Temp
     echo Deleting folders in %TEMP_DIR_SYSTEM%...
-    for /d %%D in ("%TEMP_DIR_SYSTEM%\*") do rd /s /q "%%D"
+    for /d %%D in ("%TEMP_DIR_SYSTEM%\*") do (
+        rd /s /q "%%D"
+    )
 )
 
 echo.
 echo All files and folders in C:\Windows\Temp have been cleaned successfully!
 echo Returning to the main menu...
 timeout /t 3 >nul
-
 goto main
 
 
