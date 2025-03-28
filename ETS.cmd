@@ -46,28 +46,6 @@ if %errorlevel% NEQ 0 (
     exit
 )
 
-
-:: ====== FIX: Prevent Termination While Cleaning TEMP ======
-set SAFE_DIR=%ProgramData%\ETS911
-set SCRIPT_NAME=%~nx0
-set SAFE_SCRIPT=%SAFE_DIR%\%SCRIPT_NAME%
-
-if not exist "%SAFE_DIR%" mkdir "%SAFE_DIR%"
-
-:: Check if script is already running from the safe location
-if /I "%CD%" neq "%SAFE_DIR%" (
-    echo Moving script to %SAFE_DIR%...
-    
-    :: Copy the script to SAFE_DIR
-    copy "%~f0" "%SAFE_SCRIPT%" /Y >nul
-
-    :: Start the script from SAFE_DIR
-    start "" "%SAFE_SCRIPT%"
-
-    :: Exit current instance
-    exit
-)
-
 :: Now running from SAFE_DIR, proceed with execution
 cd /d "%SAFE_DIR%"
 echo Running from a safe location, proceeding...
