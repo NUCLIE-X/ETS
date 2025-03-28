@@ -1,32 +1,29 @@
 @echo off
-:: Prevent Termination While Cleaning TEMP
+:: Prevent script termination while cleaning TEMP
 
 :: Define safe execution path
 set SAFE_DIR=%ProgramData%\ETS911
 set SCRIPT_NAME=cleanup.bat
 set SAFE_SCRIPT=%SAFE_DIR%\%SCRIPT_NAME%
 
-:: Create directory if it doesn't exist
+:: Ensure the directory exists
 if not exist "%SAFE_DIR%" mkdir "%SAFE_DIR%"
 
-:: Check if script is already running from safe location
+:: Check if already running from SAFE_DIR
 if /I "%CD%" neq "%SAFE_DIR%" (
     echo Moving script to %SAFE_DIR%...
-    
-    :: Copy the script to SAFE_DIR
+
+    :: Copy the script to the safe directory
     copy "%~f0" "%SAFE_SCRIPT%" /Y >nul
 
-    :: Start the script from SAFE_DIR
-    start "" "%SAFE_SCRIPT%"
-
-    :: Exit current instance to prevent self-deletion
+    :: Launch script in a separate PowerShell process and exit
+    powershell -Command "Start-Process -FilePath '%SAFE_SCRIPT%' -WindowStyle Hidden"
     exit
 )
 
-:: Ensure we are running from the safe directory
+:: Ensure script runs from the safe directory
 cd /d "%SAFE_DIR%"
-echo Running from a safe location, proceeding...
-
+echo Running from a safe location...
 
 
 
